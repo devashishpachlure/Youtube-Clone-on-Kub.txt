@@ -5,9 +5,9 @@ DevSecOps-Pipeline-Project-Deploy-Youtube-Clone-on-Kubernetes
 [A] Let's use Terraform to create an EC2 instance for Jenkins, Docker and SonarQube
 1--main.tf
 resource "aws_instance" "web" {
-  ami                    = "ami-0287a05f0ef0e9d9a"      #change ami id for different region
+  ami                    = "ami-005fc0f236362e99f"      #change ami id for different region
   instance_type          = "t2.large"
-  key_name               = "Linux-VM-Key7"              #change key name as per your setup
+  key_name               = "deva1"              #change key name as per your setup
   vpc_security_group_ids = [aws_security_group.Jenkins-VM-SG.id]
   user_data              = templatefile("./install.sh", {})
 
@@ -62,7 +62,7 @@ terraform {
 }
 # Configure the AWS Provider
 provider "aws" {
-  region = "ap-south-1"     #change region as per you requirement
+  region = "us-east-1"     #change region as per you requirement
 }
 
 
@@ -102,9 +102,9 @@ sudo apt-get install trivy -y
 [B] Create EC2 Instance and Setup Prometheus & Grafana
 1--main.tf
 resource "aws_instance" "web" {
-  ami                    = "ami-0287a05f0ef0e9d9a"      #change ami id for different region
+  ami                    = "ami-005fc0f236362e99f"      #change ami id for different region
   instance_type          = "t2.medium"
-  key_name               = "Linux-VM-Key7"              #change key name as per your setup
+  key_name               = "deva1"              #change key name as per your setup
   vpc_security_group_ids = [aws_security_group.Monitoring-Server-SG.id]
   user_data              = templatefile("./install.sh", {})
 
@@ -159,7 +159,7 @@ terraform {
 }
 # Configure the AWS Provider
 provider "aws" {
-  region = "ap-south-1"     #change region as per you requirement
+  region = "us-east-1"     #change region as per you requirement
 }
 
 
@@ -292,7 +292,7 @@ $ eksctl version
 
 4--Setup Kubernetes using eksctl
 eksctl create cluster --name virtualtechbox-cluster \
---region ap-south-1 \
+--region us-east-1 \
 --node-type t2.small \
 --nodes 3 \
 
@@ -388,15 +388,15 @@ pipeline {
                  script{
                    withDockerRegistry(credentialsId: 'dockerhub', toolName: 'docker'){   
                       sh "docker build -t youtube-clone ."
-                      sh "docker tag youtube-clone ashfaque9x/youtube-clone:latest "
-                      sh "docker push ashfaque9x/youtube-clone:latest "
+                      sh "docker tag youtube-clone devashishpachlure/youtube-clone:latest "
+                      sh "docker push devashishpachlure/youtube-clone:latest "
                     }
                 }
             }
         }
         stage("TRIVY Image Scan"){
             steps{
-                sh "trivy image ashfaque9x/youtube-clone:latest > trivyimage.txt" 
+                sh "trivy image devashishpachlure/youtube-clone:latest > trivyimage.txt" 
             }
         }
         stage('Deploy to Kubernets'){
@@ -420,7 +420,7 @@ pipeline {
             body: "Project: ${env.JOB_NAME}<br/>" +
                 "Build Number: ${env.BUILD_NUMBER}<br/>" +
                 "URL: ${env.BUILD_URL}<br/>",
-            to: 'ashfaque.s510@gmail.com',                              
+            to: 'volleydev28@gmail.com',                              
             attachmentsPattern: 'trivyfs.txt,trivyimage.txt'
         }
     }
